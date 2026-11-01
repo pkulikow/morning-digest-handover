@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { countStatuses } from './counts.js';
 import type { DigestRow, Night, ReadNight, RunStatus } from './types.js';
 
 const STATUSES: readonly string[] = ['ok', 'retry', 'fail'];
@@ -35,6 +36,7 @@ export const readNight: ReadNight = (runsDir, night) => {
   }
   const byJob = new Map<string, DigestRow>();
   let badLines = 0;
+  const statuses: RunStatus[] = [];
   for (const raw of text.split('\n')) {
     if (raw.trim() === '') continue;
     const line = parseLine(raw);
@@ -42,6 +44,7 @@ export const readNight: ReadNight = (runsDir, night) => {
       badLines++;
       continue;
     }
+    statuses.push(line.status);
     const row = byJob.get(line.job);
     if (!row) {
       byJob.set(line.job, {
@@ -64,5 +67,5 @@ export const readNight: ReadNight = (runsDir, night) => {
     row.lastAt = line.at;
   }
   const rows = [...byJob.values()].sort((a, b) => a.job.localeCompare(b.job));
-  return { rows, badLines } satisfies Night;
+  return { rows, badLines, counts: countStatuses(statuses) } satisfies Night;
 };

@@ -1,5 +1,7 @@
 export type RunStatus = 'ok' | 'retry' | 'fail';
 
+export type StatusCounts = Record<RunStatus, number>;
+
 export type DigestRow = {
   job: string;
   owner: string | null;
@@ -14,6 +16,7 @@ export type DigestRow = {
 export type Night = {
   rows: DigestRow[];
   badLines: number;
+  counts: StatusCounts;
 };
 
 // Reads runs/<night>.jsonl. Returns null when the night has no file; a bad line is counted, never thrown.
